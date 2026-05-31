@@ -307,7 +307,7 @@ function Sidebar({ route, setRoute, liveCount }) {
             <div style={{ fontSize: 11.5, color: 'var(--ink-2)', lineHeight: 1.45, marginTop: 2 }}>Een afspraak telt pas als de tool <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5 }}>success:true</span> gaf.</div>
           </div>
         </div>
-        <button className="focusable" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 10, border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--ink-2)', fontSize: 13.5, fontWeight: 500 }}>
+        <button onClick={() => window.asoriToast && window.asoriToast('Accountinstellingen — binnenkort', 'settings')} className="focusable" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 10, border: 'none', background: 'transparent', cursor: 'pointer', color: 'var(--ink-2)', fontSize: 13.5, fontWeight: 500 }}>
           <Avatar name="Rakesh B" size={26} /> Rakesh B.
           <Icon name="settings" size={15} style={{ marginLeft: 'auto', color: 'var(--ink-3)' }} />
         </button>
