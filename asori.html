@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Asori — Operator Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    /* ---- Pine (default) ---- */
+    --paper:    #F4F1EA;
+    --surface:  #FFFFFF;
+    --surface-2:#FBFAF6;
+    --ink:      #1A1C18;
+    --ink-2:    #595D54;
+    --ink-3:    #8A8E84;
+    --line:     #E6E1D6;
+    --line-2:   #EFEBE2;
+    --primary:  #1F5C46;
+    --primary-h:#184a38;
+    --primary-soft:#E5EEE8;
+    --on-primary:#FFFFFF;
+    --live:     #DD4F2A;
+    --live-soft:#FBE7DF;
+    --amber:    #B5841C;
+    --amber-soft:#F6EBD2;
+    --info:     #2C5AA8;
+    --info-soft:#E4EAF5;
+
+    --radius:   13px;
+    --radius-sm:9px;
+    --radius-lg:20px;
+    --shadow-sm: 0 1px 2px rgba(26,28,24,.05), 0 1px 1px rgba(26,28,24,.04);
+    --shadow:    0 6px 22px -8px rgba(26,28,24,.16), 0 2px 6px -2px rgba(26,28,24,.07), 0 1px 2px rgba(26,28,24,.05);
+    --shadow-lg: 0 32px 80px -24px rgba(26,28,24,.34), 0 12px 28px -12px rgba(26,28,24,.18);
+    --ease-spring: cubic-bezier(.34,1.4,.5,1);
+    --ease-out: cubic-bezier(.16,.84,.3,1);
+
+    --font-display: 'Bricolage Grotesque', sans-serif;
+    --font-ui: 'Hanken Grotesk', sans-serif;
+    --font-mono: 'Geist Mono', monospace;
+
+    --density: 1;
+  }
+
+  /* ---- Ink theme (control-room, cool slate + electric blue) ---- */
+  [data-theme="ink"] {
+    --paper:    #0E1116;
+    --surface:  #171B22;
+    --surface-2:#1E232C;
+    --ink:      #EDEFF2;
+    --ink-2:    #9AA2AE;
+    --ink-3:    #6B7280;
+    --line:     #272D37;
+    --line-2:   #20262F;
+    --primary:  #4F8DF7;
+    --primary-h:#3D7BE8;
+    --primary-soft:#19273F;
+    --on-primary:#0B0E13;
+    --live:     #FF6B47;
+    --live-soft:#3A1E18;
+    --amber:    #E0A93B;
+    --amber-soft:#322712;
+    --info:     #6AA0FF;
+    --info-soft:#1A2740;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
+    --shadow:    0 6px 20px -6px rgba(0,0,0,.55);
+    --shadow-lg: 0 28px 70px -20px rgba(0,0,0,.7);
+  }
+
+  /* ---- Clay theme (warm, human, terracotta) ---- */
+  [data-theme="clay"] {
+    --paper:    #F3EBE0;
+    --surface:  #FFFCF8;
+    --surface-2:#FAF3EA;
+    --ink:      #2A211B;
+    --ink-2:    #6E5F53;
+    --ink-3:    #9C8C7E;
+    --line:     #E6D8C8;
+    --line-2:   #EFE5D7;
+    --primary:  #BB5A3C;
+    --primary-h:#A24A2E;
+    --primary-soft:#F4E2D7;
+    --on-primary:#FFFFFF;
+    --live:     #C5452E;
+    --live-soft:#F6E0D8;
+    --amber:    #B07A1B;
+    --amber-soft:#F4E8CF;
+    --info:     #4F6E8F;
+    --info-soft:#E6ECF1;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-ui);
+    background: var(--paper);
+    background-image:
+      radial-gradient(1200px 600px at 78% -8%, color-mix(in srgb, var(--primary) 6%, transparent), transparent 60%),
+      radial-gradient(900px 500px at -5% 110%, color-mix(in srgb, var(--primary) 5%, transparent), transparent 55%);
+    background-attachment: fixed;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow: hidden;
+  }
+  #root { height: 100vh; width: 100vw; }
+
+  ::selection { background: var(--primary-soft); color: var(--ink); }
+
+  /* scrollbars */
+  .scroll { overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+  .scroll::-webkit-scrollbar { width: 9px; height: 9px; }
+  .scroll::-webkit-scrollbar-thumb { background: var(--line); border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; }
+  .scroll::-webkit-scrollbar-thumb:hover { background: var(--ink-3); }
+
+  @keyframes asori-pulse { 0%,100% { opacity:1; transform:scale(1);} 50%{opacity:.45; transform:scale(.88);} }
+  @keyframes asori-ring { 0% { box-shadow: 0 0 0 0 var(--live-soft);} 70%{ box-shadow:0 0 0 10px transparent;} 100%{ box-shadow:0 0 0 0 transparent;} }
+  @keyframes asori-fade-up { from { opacity:0; transform: translateY(12px);} to { opacity:1; transform:none;} }
+  @keyframes asori-fade { from { opacity:0;} to { opacity:1;} }
+  @keyframes asori-blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+  @keyframes asori-bar { 0%,100%{ transform: scaleY(.28);} 50%{ transform: scaleY(1);} }
+  @keyframes asori-spin { to { transform: rotate(360deg);} }
+  @keyframes asori-sheen { to { background-position: 200% 0; } }
+  @keyframes asori-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  @keyframes asori-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+  @keyframes asori-page { from { opacity:0; transform: translateY(10px) scale(.992);} to { opacity:1; transform:none;} }
+  @keyframes asori-pop { 0%{ opacity:0; transform: scale(.8);} 60%{ transform: scale(1.06);} 100%{ opacity:1; transform: scale(1);} }
+  @keyframes asori-glow { 0%,100%{ box-shadow: 0 0 0 0 color-mix(in srgb, var(--live) 50%, transparent);} 50%{ box-shadow: 0 0 0 5px color-mix(in srgb, var(--live) 0%, transparent);} }
+  @keyframes asori-shimmer { 0%{ background-position: -200% 0;} 100%{ background-position: 200% 0;} }
+
+  .fade-up { animation: asori-fade-up .5s var(--ease-out) both; }
+  .fade-in { animation: asori-fade .45s ease both; }
+  .page-anim { animation: asori-page .42s var(--ease-out) both; }
+  .pop-in { animation: asori-pop .42s var(--ease-spring) both; }
+  #root { position: relative; z-index: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  }
+
+  /* focus ring */
+  button, a, input, select, textarea { font-family: inherit; }
+  .focusable:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="components.jsx"></script>
+<script type="text/babel" src="live.jsx"></script>
+<script type="text/babel" src="screens.jsx"></script>
+<script type="text/babel" src="landing.jsx"></script>
+<script type="text/babel" src="app.jsx"></script>
+</body>
+</html>
