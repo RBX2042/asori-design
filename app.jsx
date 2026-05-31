@@ -386,7 +386,7 @@ function CommandPalette({ onClose, setRoute, setView, setTheme, openClient, open
 
   const run = fn => () => { fn(); onClose(); };
   const items = [
-    ...window.NAV.map(n => ({ group: 'Navigatie', label: n.label, icon: n.icon, run: run(() => setRoute(n.id)) })),
+    ...window.NAV.map(n => ({ group: 'Navigatie', label: n.label, icon: n.icon, run: run(() => { setView('app'); setRoute(n.id); }) })),
     { group: 'Weergave', label: 'Landingspagina', hint: 'marketing', icon: 'external', run: run(() => setView('landing')) },
     { group: 'Weergave', label: 'Operator-console', hint: 'app', icon: 'grid', run: run(() => setView('app')) },
     ...[['pine', 'Pine'], ['ink', 'Ink'], ['clay', 'Clay']].map(([k, l]) => ({ group: 'Weergave', label: 'Thema · ' + l, icon: 'sliders', run: run(() => setTheme(k)) })),
