@@ -15,6 +15,8 @@ function LiveCall({ embedded }) {
   const raf = useRefL(null);
   const last = useRefL(null);
   const scrollRef = useRefL(null);
+  const spokenRef = useRefL(null);
+  if (!spokenRef.current) spokenRef.current = new Set();
 
   useEffectL(() => {
     if (!playing) return;
@@ -58,7 +60,34 @@ function LiveCall({ embedded }) {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [events.length]);
 
-  const replay = () => { setClock(0); setPlaying(true); };
+  // Optionele echte stem: speelt ElevenLabs-audio af naast elke Asori-regel
+  // zodra window.ASORI_VOICE_CONFIG.endpoint is ingesteld (zie server/README).
+  // Zonder config blijft dit een no-op en werkt de gesimuleerde demo zoals voorheen.
+  useEffectL(() => {
+    const cfg = window.ASORI_VOICE_CONFIG;
+    if (!cfg || !cfg.endpoint) return;
+    const line = events[events.length - 1];
+    if (!line || line.type !== 'asori' || spokenRef.current.has(line.at)) return;
+    spokenRef.current.add(line.at);
+
+    fetch(cfg.endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: line.text, voiceId: cfg.voiceId }),
+    })
+      .then(r => (r.ok ? r.blob() : Promise.reject(r)))
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.addEventListener('ended', () => URL.revokeObjectURL(url));
+        // Kan geweigerd worden door het autoplay-beleid van de browser vóór de
+        // eerste gebruikersinteractie — negeer dat stil, tekst blijft altijd zichtbaar.
+        audio.play().catch(() => {});
+      })
+      .catch(() => {});
+  }, [events.length]);
+
+  const replay = () => { spokenRef.current.clear(); setClock(0); setPlaying(true); };
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: embedded ? '1fr' : 'minmax(0,1fr) 318px', gap: 18, height: '100%', minHeight: 0 }}>
